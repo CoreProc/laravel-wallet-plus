@@ -1,0 +1,49 @@
+{
+    "name": "coreproc/laravel-wallet-plus",
+    "description": "Easily add a virtual wallet to your Laravel models. Features multiple wallets and a ledger system to help keep track of all transactions in the wallets.",
+    "keywords": [
+        "coreproc",
+        "laravel-wallet-plus"
+    ],
+    "homepage": "https://github.com/coreproc/laravel-wallet-plus",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris Bautista",
+            "email": "chris.bautista@coreproc.ph",
+            "homepage": "https://coreproc.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.3"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^4.3",
+        "phpunit/phpunit": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "CoreProc\\WalletPlus\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CoreProc\\WalletPlus\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "CoreProc\\WalletPlus\\WalletPlusServiceProvider"
+            ]
+        }
+    }
+}
