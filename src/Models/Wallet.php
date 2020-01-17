@@ -25,6 +25,15 @@ class Wallet extends Model
         return $this->belongsTo(WalletType::class);
     }
 
+    public function getBalanceAttribute()
+    {
+        if ($this->walletType->decimals === 0) {
+            return $this->raw_balance;
+        }
+
+        return $this->raw_balance * pow(10, $this->walletType->decimals);
+    }
+
     /**
      * @param $transaction WalletTransaction|integer
      * @throws Exception
@@ -50,9 +59,38 @@ class Wallet extends Model
         return;
     }
 
-    private function createWalletLedgerEntry($transaction, $newRunningRawBalance)
+    /**
+     * @param $transaction WalletTransaction|integer
+     * @throws Exception
+     */
+    public function decrementBalance($transaction)
     {
         if (is_int($transaction)) {
+            $this->decrement('raw_balance', $transaction);
+            $this->createWalletLedgerEntry($transaction, $this->raw_balance, 'decrement');
+
+            return;
+        }
+
+        if (! $transaction instanceof WalletTransaction) {
+            throw new Exception('Decrement balance expects parameter to be an integer or a WalletTransaction object.');
+        }
+
+        $this->decrement('raw_balance', $transaction->getAmount());
+
+        // Record in ledger
+        $this->createWalletLedgerEntry($transaction, $this->raw_balance, 'decrement');
+
+        return;
+    }
+
+    private function createWalletLedgerEntry($transaction, $newRunningRawBalance, $type = 'increment')
+    {
+        if (is_int($transaction)) {
+            if ($type === 'decrement') {
+                $transaction = -$transaction;
+            }
+
             return WalletLedger::query()->create([
                 'wallet_id' => $this->id,
                 'amount' => $transaction,
@@ -64,11 +102,17 @@ class Wallet extends Model
             throw new Exception('Increment balance expects parameter to be an integer or a WalletTransaction object.');
         }
 
+        $amount = $transaction->getAmount();
+
+        if ($type === 'decrement') {
+            $amount = -$amount;
+        }
+
         return WalletLedger::query()->create([
             'wallet_id' => $this->id,
             'transaction_id' => $transaction->id,
             'transaction_type' => get_class($transaction),
-            'amount' => $transaction->getAmount(),
+            'amount' => $amount,
             'running_raw_balance' => $newRunningRawBalance,
         ]);
     }
