@@ -11,19 +11,7 @@ class WalletPlusServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__ . '/../config/config.php' => config_path('wallet-plus.php'),
-            ], 'config');
-
-            /*
-            $this->loadViewsFrom(__DIR__.'/../resources/views', 'wallet-plus');
-
-            $this->publishes([
-                __DIR__.'/../resources/views' => base_path('resources/views/vendor/wallet-plus'),
-            ], 'views');
-            */
-        }
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
     }
 
     /**
@@ -31,6 +19,6 @@ class WalletPlusServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'wallet-plus');
+        // $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'wallet-plus');
     }
 }
