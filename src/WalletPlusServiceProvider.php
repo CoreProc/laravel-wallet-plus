@@ -11,7 +11,12 @@ class WalletPlusServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        if (! class_exists('CreateWalletPlusTables')) {
+            $this->publishes([
+                __DIR__ . '/../database/migrations/create_wallet_plus_tables.php.stub' => database_path('migrations/' .
+                    date('Y_m_d_His', time()) . '_create_wallet_plus_tables.php'),
+            ], 'migrations');
+        }
     }
 
     /**
