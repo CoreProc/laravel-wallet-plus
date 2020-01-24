@@ -27,28 +27,30 @@ class Wallet extends Model
 
     public function getBalanceAttribute()
     {
-        if ($this->walletType->decimals === 0) {
+        if (empty($this->walletType->decimals)) {
             return $this->raw_balance;
         }
 
-        return $this->raw_balance * pow(10, $this->walletType->decimals);
+        return $this->raw_balance / pow(10, $this->walletType->decimals);
     }
 
     /**
-     * @param $transaction WalletTransaction|integer
+     * @param $transaction WalletTransaction|integer|float|double
+     * @return Wallet
      * @throws Exception
      */
     public function incrementBalance($transaction)
     {
-        if (is_int($transaction)) {
-            $this->increment('raw_balance', $transaction);
-            $this->createWalletLedgerEntry($transaction, $this->raw_balance);
+        if (is_numeric($transaction)) {
+            $amount = $this->convertToWalletTypeInteger($transaction);
+            $this->increment('raw_balance', $amount);
+            $this->createWalletLedgerEntry($amount, $this->raw_balance);
 
-            return;
+            return $this;
         }
 
         if (! $transaction instanceof WalletTransaction) {
-            throw new Exception('Increment balance expects parameter to be an integer or a WalletTransaction object.');
+            throw new Exception('Increment balance expects parameter to be a float or a WalletTransaction object.');
         }
 
         $this->increment('raw_balance', $transaction->getAmount());
@@ -56,24 +58,26 @@ class Wallet extends Model
         // Record in ledger
         $this->createWalletLedgerEntry($transaction, $this->raw_balance);
 
-        return;
+        return $this;
     }
 
     /**
-     * @param $transaction WalletTransaction|integer
+     * @param $transaction WalletTransaction|integer|float|double
+     * @return Wallet
      * @throws Exception
      */
     public function decrementBalance($transaction)
     {
-        if (is_int($transaction)) {
-            $this->decrement('raw_balance', $transaction);
-            $this->createWalletLedgerEntry($transaction, $this->raw_balance, 'decrement');
+        if (is_numeric($transaction)) {
+            $amount = $this->convertToWalletTypeInteger($transaction);
+            $this->decrement('raw_balance', $amount);
+            $this->createWalletLedgerEntry($amount, $this->raw_balance, 'decrement');
 
-            return;
+            return $this;
         }
 
         if (! $transaction instanceof WalletTransaction) {
-            throw new Exception('Decrement balance expects parameter to be an integer or a WalletTransaction object.');
+            throw new Exception('Decrement balance expects parameter to be a number or a WalletTransaction object.');
         }
 
         $this->decrement('raw_balance', $transaction->getAmount());
@@ -81,12 +85,19 @@ class Wallet extends Model
         // Record in ledger
         $this->createWalletLedgerEntry($transaction, $this->raw_balance, 'decrement');
 
-        return;
+        return $this;
     }
 
+    /**
+     * @param $transaction
+     * @param $newRunningRawBalance
+     * @param string $type
+     * @return mixed
+     * @throws Exception
+     */
     private function createWalletLedgerEntry($transaction, $newRunningRawBalance, $type = 'increment')
     {
-        if (is_int($transaction)) {
+        if (is_numeric($transaction)) {
             if ($type === 'decrement') {
                 $transaction = -$transaction;
             }
@@ -99,10 +110,11 @@ class Wallet extends Model
         }
 
         if (! $transaction instanceof WalletTransaction) {
-            throw new Exception('Increment balance expects parameter to be an integer or a WalletTransaction object.');
+            throw new Exception('Wallet ledger entries expect first parameter to be numeric or a WalletTransaction ' .
+                'instance');
         }
 
-        $amount = $transaction->getAmount();
+        $amount = $this->convertToWalletTypeInteger($transaction->getAmount());
 
         if ($type === 'decrement') {
             $amount = -$amount;
@@ -115,5 +127,20 @@ class Wallet extends Model
             'amount' => $amount,
             'running_raw_balance' => $newRunningRawBalance,
         ]);
+    }
+
+    /**
+     * Converts the given value to an integer that is compatible with this wallet's type.
+     *
+     * @param int $value
+     * @return float|int
+     */
+    private function convertToWalletTypeInteger($value)
+    {
+        if (empty($this->walletType) || $this->walletType->decimals === 0) {
+            return $value;
+        }
+
+        return (int)($value * pow(10, $this->walletType->decimals));
     }
 }
