@@ -24,6 +24,11 @@ class Wallet extends Model
     {
         return $this->belongsTo(WalletType::class);
     }
+    
+    public function walletLedgers()
+    {
+        return $this->hasMany(WalletLedger::class);
+    }
 
     public function getBalanceAttribute()
     {
