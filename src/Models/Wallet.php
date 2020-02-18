@@ -58,7 +58,7 @@ class Wallet extends Model
             throw new Exception('Increment balance expects parameter to be a float or a WalletTransaction object.');
         }
 
-        $this->increment('raw_balance', $transaction->getAmount());
+        $this->increment('raw_balance', $transaction->getAmount() * pow(10, $this->walletType->decimals));
 
         // Record in ledger
         $this->createWalletLedgerEntry($transaction, $this->raw_balance);
@@ -85,7 +85,7 @@ class Wallet extends Model
             throw new Exception('Decrement balance expects parameter to be a number or a WalletTransaction object.');
         }
 
-        $this->decrement('raw_balance', $transaction->getAmount());
+        $this->decrement('raw_balance', $transaction->getAmount() * pow(10, $this->walletType->decimals));
 
         // Record in ledger
         $this->createWalletLedgerEntry($transaction, $this->raw_balance, 'decrement');
