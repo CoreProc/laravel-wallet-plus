@@ -22,7 +22,7 @@ class CreateWalletPlusTables extends Migration
 
         Schema::create('wallets', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->morphs('user');
+            $table->nullableMorphs('user');
             $table->unsignedBigInteger('wallet_type_id')->nullable();
             $table->bigInteger('raw_balance')->default(0);
             $table->timestamps();
