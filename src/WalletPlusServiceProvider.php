@@ -11,7 +11,7 @@ class WalletPlusServiceProvider extends ServiceProvider
     /**
      * Bootstrap the application services.
      */
-    public function boot(Filesystem $filesystem)
+    public function boot(Filesystem $filesystem): void
     {
         $this->publishes([
             __DIR__ . '/../database/migrations/create_wallet_plus_tables.php.stub' =>
@@ -22,7 +22,7 @@ class WalletPlusServiceProvider extends ServiceProvider
     /**
      * Register the application services.
      */
-    public function register()
+    public function register(): void
     {
         // $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'wallet-plus');
     }

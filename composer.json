@@ -16,11 +16,16 @@
         }
     ],
     "require": {
-        "php": "^7.3 || ^8.0"
+        "php": "^8.2",
+        "illuminate/support": "^12.0",
+        "illuminate/database": "^12.0",
+        "illuminate/contracts": "^12.0",
+        "nesbot/carbon": "^3.0"
     },
     "require-dev": {
-        "symfony/var-dumper": "^4.3 || ^5.1 || ^6.0",
-        "phpunit/phpunit": "^8.2 || ^9.3"
+        "orchestra/testbench": "^10.0",
+        "phpunit/phpunit": "^11.0",
+        "symfony/var-dumper": "^7.0"
     },
     "autoload": {
         "psr-4": {
