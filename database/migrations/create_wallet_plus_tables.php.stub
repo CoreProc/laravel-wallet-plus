@@ -53,4 +53,4 @@ return new class extends Migration
         Schema::dropIfExists('wallets');
         Schema::dropIfExists('wallet_ledgers');
     }
-}
+};
